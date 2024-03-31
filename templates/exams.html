@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% endblock %}
+
+
+
+{% block body %}
+
+
+        <header class="py-4">
+            <div class="container px-lg-5">
+                <div class="p-4 p-lg-1 bg-light rounded-3 text-center">
+                    <div class="m-4 m-lg-5">
+                        <h1 class="display-5 fw-bold">Exams Management</h1>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section id="about">
+            <div class="container px-4">
+                <div class="row gx-4 justify-content-center">
+                    <div class="col-lg-10">
+
+                        {% with messages = get_flashed_messages() %}
+                            {% if messages %}
+
+                                {% for message in messages %}
+                                    <div class="alert alert-dismissible fade show {% if message == "The exam has been deleted." %} alert-danger {% else %} alert-success {% endif %}" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <br>
+
+                        <h1>Exams
+                            <button type="button" class="btn btn-success btn-lg btn-block" data-bs-toggle="modal" data-bs-target="#add_exam">Add Exam</button>
+                        </h1>
+
+                        <br>
+
+                        <div class="modal fade" id="add_exam" aria-labelledby="add_typeLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="add_modalLabel">Add Exam</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form action="{{ url_for('exams') }}" method="POST" novalidate>
+                                                <div class="modal-body">
+                                                    {{ form.hidden_tag() }}
+                                                <p>
+                                                    {{ form.exam_date.label }}:<br>
+                                                    {{ form.exam_date(class='datepicker') }}
+                                                </p>
+                                                <p>
+                                                    {{ form.exam_length.label }}:<br>
+                                                    {{ form.exam_length }}
+                                                </p>
+                                                <p>
+                                                    {{ form.courses.label }}:<br>
+                                                    {{ form.courses }}
+                                                </p>
+                                                <p>{{ form.submit() }}</p>
+                                                </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                        </div>
+
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Course Name</th>
+                                    <th scope="col">Exam Date</th>
+                                    <th scope="col">Exam Length</th>
+                                </tr>
+                            </thead>
+                            {% for exam in exams %}
+                            <tr>
+                                <td>{{ exam.name }}</td>
+                                <td>{{ exam.exam_date }}</td>
+                                <td>{{ exam.exam_length }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-success btn-block" data-bs-toggle="modal" data-bs-target="#update_modal{{exam.examid}}">Update</button>
+                                    <div class="modal fade" id="update_modal{{exam.examid}}" aria-labelledby="update_modalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="update_modalLabel">Update Exam</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form action="{{url_for('exam_update', examid=exam.examid)}}" method="POST" novalidate>
+                                                <div class="modal-body">
+
+                                                    <p>
+                                                    <label for="exam_date">Exam Date:</label><br>
+                                                    <input type="date" id="exam_date" name="exam_date" value="{{ exam.exam_date }}">
+                                                    </p>
+                                                    <p>
+                                                    <label for="exam_length">Exam Length:</label><br>
+                                                    <input type="text" id="exam_length" name="exam_length" value="{{ exam.exam_length }}">
+                                                    </p>
+                                                    <p>
+                                                    <label for="courses">Courses:</label><br>
+                                                    <select id="courses" name="courses">
+                                                        <option value="{{exam.courseid}}" selected>{{ exam.name }}</option>
+                                                        {% for course in courses %}
+                                                        <option value="{{course.courseid}}">{{ course.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    </p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <input type="submit" class="btn btn-success" value="Submit">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_modal{{exam.examid}}">Delete</button>
+                                    <div class="modal fade" id="delete_modal{{exam.examid}}" aria-labelledby="delete_modalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="delete_modalLabel">Delete Exam</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to delete this exam? This can't be undone.
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form action="{{url_for('exam_delete', examid=exam.examid)}}" method="POST">
+                                                        <input type="submit" class="btn btn-primary" value="Delete">
+                                                    </form>
+                                              </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        {% if exam.exam_date <= exam.current_date %}
+                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#grades_modal{{exam.examid}}">Grades</button>
+                                            <div class="modal fade" id="grades_modal{{exam.examid}}" aria-labelledby="grades_modalLabel" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="delete_modalLabel">Exam Grades</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <table class="table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th scope="col">First Name</th>
+                                                                        <th scope="col">Last Name</th>
+                                                                        <th scope="col">Specialization</th>
+                                                                        <th scope="col">Year</th>
+                                                                        <th scope="col">Grade</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                {% for student in students %}
+                                                                    {% if student.examid == exam.examid %}
+                                                                        <tr>
+                                                                            <td>{{ student.fName }}</td>
+                                                                            <td>{{ student.lName }}</td>
+                                                                            <td>{{ student.specialization }}</td>
+                                                                            <td>{{ student.year }}</td>
+                                                                            <td>
+                                                                                <form action="{{url_for('grade_update', examid=exam.examid, studentid=student.studentid)}}" method="POST">
+                                                                                    <input type="text" id="grade_input" name="grade" value="{{ student.grade }}" class="form-control-sm {% if student.grade is not none and student.grade >= 5 %}bg-success{% elif student.grade is not none and student.grade < 5 %}bg-danger{% endif %}">
+                                                                                    <input type="submit" class="btn btn-primary" value="Modify">
+                                                                                </form>
+                                                                            </td>
+                                                                        </tr>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </table>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
+                                                      </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                            </tr>
+                            {% endfor %}
+
+                        </table>
+
+
+                        <br>
+
+
+                        <br>
+                        <br>
+                        <br>
+
+                        <br>
+
+
+                        <br>
+                        <br>
+                        <br>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+{% endblock %}

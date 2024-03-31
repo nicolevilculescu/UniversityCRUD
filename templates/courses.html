@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% endblock %}
+
+
+
+{% block body %}
+
+
+        <header class="py-4">
+            <div class="container px-lg-5">
+                <div class="p-4 p-lg-1 bg-light rounded-3 text-center">
+                    <div class="m-4 m-lg-5">
+                        <h1 class="display-5 fw-bold">Course Management</h1>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section id="about">
+            <div class="container px-4">
+                <div class="row gx-4 justify-content-center">
+                    <div class="col-lg-10">
+
+                        {% with messages = get_flashed_messages() %}
+                            {% if messages %}
+
+                                {% for message in messages %}
+                                    <div class="alert alert-dismissible fade show {% if message == "The course has been deleted." %} alert-danger {% else %} alert-success {% endif %}" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <br>
+
+                        <h1>Courses
+                            <button id="addId" type="button" class="btn btn-success btn-lg btn-block" data-bs-toggle="modal" data-bs-target="#add_course">Add Course</button>
+                        </h1>
+
+                        <br>
+
+                        <div class="modal fade" id="add_course" aria-labelledby="add_typeLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="add_modalLabel">Add Course</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form id="addForm" action="{{ url_for('courses') }}" method="POST" novalidate>
+                                    <div class="modal-body">
+                                        {{ form.hidden_tag() }}
+                                    <p>
+                                        {{ form.name.label }}:<br>
+                                        {{ form.name }}
+                                    </p>
+                                    <p>
+                                        {{ form.description.label }}:<br>
+                                        {{ form.description }}
+                                    </p>
+                                    <p>
+                                        {{ form.credits.label }}:<br>
+                                        {{ form.credits }}
+                                    </p>
+                                    <p>{{ form.submit() }}</p>
+                                    </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Course Name</th>
+                                    <th scope="col">Course Description</th>
+                                    <th scope="col">Course Credits</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for course in courses %}
+                                <tr>
+                                    <td>{{ course.name }}</td>
+                                    <td>{{ course.description }}</td>
+                                    <td>{{ course.credits }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-success btn-block" data-bs-toggle="modal" data-bs-target="#update_modal{{course.courseid}}">Update</button>
+                                        <div class="modal fade" id="update_modal{{course.courseid}}" aria-labelledby="update_modalLabel" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="update_modalLabel">Update Course</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <form action="{{url_for('course_update', courseid=course.courseid)}}" method="POST" novalidate>
+                                                    <div class="modal-body">
+                                                        <p>
+                                                        <label for="name">Course Name:</label><br>
+                                                        <input type="text" id="name" name="name" value="{{ course.name }}">
+                                                        </p>
+                                                        <p>
+                                                        <label for="description">Course Description:</label><br>
+                                                        <input type="text" id="description" name="description" value="{{ course.description }}">
+                                                        </p>
+                                                        <p>
+                                                        <label for="credits">Course Credits:</label><br>
+                                                        <input type="text" id="credits" name="credits" value="{{ course.credits }}">
+                                                        </p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <input type="submit" class="btn btn-success" value="Submit">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_modal{{course.courseid}}">Delete</button>
+                                        <div class="modal fade" id="delete_modal{{course.courseid}}" aria-labelledby="delete_modalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="delete_modalLabel">Delete Course</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to delete {{ course.name }}? This can't be undone.
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form action="{{url_for('course_delete', courseid=course.courseid)}}" method="POST">
+                                                        <input type="submit" class="btn btn-primary" value="Delete">
+                                                    </form>
+                                              </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    </td>
+
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+
+
+                        </table>
+
+
+                        <br>
+
+
+                        <br>
+                        <br>
+                        <br>
+
+                        <br>
+
+
+                        <br>
+                        <br>
+                        <br>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+{% endblock %}
